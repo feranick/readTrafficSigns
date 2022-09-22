@@ -1,9 +1,9 @@
 import tkinter as tk
+import numpy as np
 from tkinter import filedialog
 from tkinter import *
 from PIL import ImageTk, Image
 
-import numpy
 #load the trained model to classify sign
 from keras.models import load_model
 model = load_model('traffic_classifier.h5')
@@ -66,9 +66,10 @@ def classify(file_path):
     global label_packed
     image = Image.open(file_path)
     image = image.resize((30,30))
-    image = numpy.expand_dims(image, axis=0)
-    image = numpy.array(image)
-    pred = model.predict_classes([image])[0]
+    image = np.expand_dims(image, axis=0)
+    image = np.array(image)
+    #pred = model.predict_classes([image])[0]
+    pred = np.argmax(model.predict([image]), axis=-1)[0]
     sign = classes[pred+1]
     print(sign)
     label.configure(foreground='#011638', text=sign)
@@ -88,7 +89,8 @@ def upload_image():
         sign_image.configure(image=im)
         sign_image.image=im
         label.configure(text='')
-        show_classify_button(file_path)
+        #show_classify_button(file_path)
+        classify(file_path)
     except:
         pass
 
