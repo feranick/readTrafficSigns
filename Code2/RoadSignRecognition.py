@@ -109,4 +109,4 @@ pred = model.predict_classes(X_test)
 from sklearn.metrics import accuracy_score
 print(accuracy_score(labels, pred))
 
-model.save(‘traffic_classifier.h5’)
+model.save("traffic_classifier.h5")
