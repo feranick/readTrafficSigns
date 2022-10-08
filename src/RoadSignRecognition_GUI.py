@@ -18,7 +18,7 @@ from PIL import ImageTk, Image
 #***************************************************
 # This is needed for installation through pip
 #***************************************************
-def DataML():
+def RoadSignRecognition_GUI():
     main()
 
 #************************************

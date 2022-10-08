@@ -23,7 +23,7 @@ from keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Dropout
 #***************************************************
 # This is needed for installation through pip
 #***************************************************
-def DataML():
+def RoadSignRecognition():
     main()
     
 #************************************
