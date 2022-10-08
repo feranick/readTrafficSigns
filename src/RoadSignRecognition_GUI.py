@@ -8,7 +8,6 @@
 '''
 print(__doc__)
 
-
 import tkinter as tk
 import numpy as np
 import os, sys, platform
@@ -31,10 +30,6 @@ def main():
     useTFlitePred = False
     TFliteRuntime = False
     runCoralEdge = False
-    
-    model = loadModel(name, useTFlitePred, TFliteRuntime, runCoralEdge)
-    #from keras.models import load_model
-    #model = load_model(name+"_classifier.h5")
 
     #initialise GUI
     top=tk.Tk()
@@ -43,18 +38,26 @@ def main():
     top.configure(background='#CDCDCD')
 
     label=Label(top,background='#CDCDCD', font=('arial',15,'bold'))
+    filelabel=Label(top,background='#CDCDCD', font=('arial',15))
     sign_image = Label(top)
+    
+    model = loadModel(name, useTFlitePred, TFliteRuntime, runCoralEdge)
+    #from keras.models import load_model
+    #model = load_model(name+"_classifier.h5")
 
     def classify(file_path):
         global label_packed
+        filelabel.configure(foreground='#011638', text=file_path)
         image = Image.open(file_path)
         image = image.resize((30,30))
         image = np.expand_dims(image, axis=0)
         image = np.array(image)
         #pred = model.predict_classes([image])[0]
-        pred = np.argmax(model.predict([image]), axis=-1)[0]
+        #pred = np.argmax(model.predict([image]), axis=-1)[0]
+        pred = np.argmax(getPredictions(image, model, useTFlitePred), axis=-1)[0]
         sign = classes()[pred+1]
-        print(sign)
+        print(" Sign:\033[1m",sign,"\033[0m - File:",file_path)
+        
         label.configure(foreground='#011638', text=sign)
 
     def show_classify_button(file_path):
@@ -63,19 +66,20 @@ def main():
         classify_b.place(relx=0.79,rely=0.46)
 
     def upload_image():
-        try:
-            file_path=filedialog.askopenfilename()
-            uploaded=Image.open(file_path)
-            uploaded.thumbnail(((top.winfo_width()/2.25),(top.winfo_height()/2.25)))
-            im=ImageTk.PhotoImage(uploaded)
+        file_path=filedialog.askopenfilename()
+        uploaded=Image.open(file_path)
+        uploaded.thumbnail(((top.winfo_width()/2.25),(top.winfo_height()/2.25)))
+        im=ImageTk.PhotoImage(uploaded)
 
-            sign_image.configure(image=im)
-            sign_image.image=im
-            label.configure(text='')
-            #show_classify_button(file_path)
+        sign_image.configure(image=im)
+        sign_image.image=im
+        label.configure(text='')
+        filelabel.configure(text='')
+        #show_classify_button(file_path)
+        try:
             classify(file_path)
         except:
-            pass
+           print("Classification failed")
 
     upload=Button(top,text="Upload an image",command=upload_image,padx=10,pady=5)
     upload.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
@@ -83,6 +87,7 @@ def main():
     upload.pack(side=BOTTOM,pady=50)
     sign_image.pack(side=BOTTOM,expand=True)
     label.pack(side=BOTTOM,expand=True)
+    filelabel.pack(side=BOTTOM,expand=True)
     heading = Label(top, text="Know Your Traffic Sign",pady=20, font=('arial',20,'bold'))
     heading.configure(background='#CDCDCD',foreground='#364156')
     heading.pack()
@@ -103,27 +108,53 @@ def loadModel(name, useTFlitePred, TFliteRuntime, runCoralEdge):
         import tflite_runtime.interpreter as tflite
         # model here is intended as interpreter
         if runCoralEdge:
-            print(" Running on Coral Edge TPU")
+            print(" Running Tensorflow lite on Coral Edge TPU\n")
             try:
-                model = tflite.Interpreter(model_path=name+'model_edgetpu.tflite',
+                model = tflite.Interpreter(model_path=name+'_model_edgetpu.tflite',
                     experimental_delegates=[tflite.load_delegate(edgeTPUSharedLib,{})])
             except:
-                print(" Coral Edge TPU not found. Please make sure it's connected. ")
+                print(" Coral Edge TPU not found or compiled model not found. \n")
         else:
-            print("useTFlitePred", "RUNTIME")
+            print(" Using Tensoflow lite runtime\n")
             model = tflite.Interpreter(model_path=name+'_model.tflite')
         model.allocate_tensors()
     else:
         #getTFVersion(dP)
         import tensorflow as tf
         if useTFlitePred:
-            print("useTFlitePred")
+            print("Using Tensorflow lite\n")
             # model here is intended as interpreter
             model = tf.lite.Interpreter(model_path=name+'_model.tflite')
             model.allocate_tensors()
         else:
             model = tf.keras.models.load_model(name+"_classifier.h5")
     return model
+
+#************************************
+# Make prediction based on framework
+#************************************
+def getPredictions(R, model, useTFlitePred):
+    if useTFlitePred:
+        interpreter = model  #needed to keep consistency with documentation
+        # Get input and output tensors.
+        input_details = interpreter.get_input_details()
+        output_details = interpreter.get_output_details()
+
+        # Test model on random input data.
+        input_shape = input_details[0]['shape']
+        #input_data = np.array(R*255, dtype=np.uint8) # Disable this for TF1.x
+        input_data = np.array(R, dtype=np.uint8) # Disable this for TF1.x
+        #input_data = np.array(R, dtype=np.float32)  # Enable this for TF2.x (not compatible with on EdgeTPU)
+        interpreter.set_tensor(input_details[0]['index'], input_data)
+        interpreter.invoke()
+
+        # The function `get_tensor()` returns a copy of the tensor data.
+        # Use `tensor()` in order to get a pointer to the tensor.
+        predictions = interpreter.get_tensor(output_details[0]['index'])
+        
+    else:
+        predictions = model.predict(R)
+    return predictions
 
 
 #************************************
