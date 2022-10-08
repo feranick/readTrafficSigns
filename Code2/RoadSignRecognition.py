@@ -45,6 +45,9 @@ def main():
     
     history = model.fit(X_train, y_train, batch_size=32, epochs=epochs, validation_data=(X_test, y_test))
     model.save("my_model.h5")
+    
+    #if dP.makeQuantizedTFlite:
+    makeQuantizedTFmodel(X_train, model, "name")
 
     plotResults(history)
 
@@ -146,6 +149,35 @@ def plotResults(history):
     plt.ylabel('loss')
     plt.legend()
     plt.show()
+    
+#************************************
+### Create Quantized tflite model
+#************************************
+def makeQuantizedTFmodel(A, model, name):
+    import tensorflow as tf
+    print("\n  Creating quantized TensorFlowLite Model...\n")
+    
+    A2 = tf.cast(A, tf.float32)
+    A = tf.data.Dataset.from_tensor_slices((A2)).batch(1)
+    
+    def representative_dataset_gen():
+        for input_value in A.take(100):
+            yield[input_value]
+            
+    #converter = tf.compat.v1.lite.TFLiteConverter.from_keras_model_file(dP.model_name)    # TF2.0-2.2 (will be deprecated)
+    converter = tf.lite.TFLiteConverter.from_keras_model(model)    # TF2.3 and higher only for full EdgeTPU support.
+
+    #converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    #converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_LATENCY]
+    converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
+    converter.representative_dataset = representative_dataset_gen
+    converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
+    converter.inference_input_type = tf.uint8
+    converter.inference_output_type = tf.uint8
+    tflite_quant_model = converter.convert()
+
+    with open("name"+'.tflite', 'wb') as o:
+        o.write(tflite_quant_model)
     
 #************************************
 # Main initialization routine
