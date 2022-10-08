@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-**********************************************************
-* OpenCV keras traffic sign recognition
+*****************************************************************************
+* OpenCV keras traffic sign recognition - Training
 * https://data-flair.training/blogs/python-project-traffic-signs-recognition/
-***********************************************************
+*****************************************************************************
 '''
 print(__doc__)
 
@@ -33,6 +33,8 @@ def main():
     
     num_classes = 43
     epochs = 3
+    name = "roadSign"
+    plotResults = False
     
     X_train, X_test, y_train, y_test = readLearnData(num_classes, "Train")
     print(X_train.shape, X_test.shape, y_train.shape, y_test.shape)
@@ -44,12 +46,13 @@ def main():
     model = cnn_model(num_classes, X_train.shape[1:])
     
     history = model.fit(X_train, y_train, batch_size=32, epochs=epochs, validation_data=(X_test, y_test))
-    model.save("my_model.h5")
+    model.save(name+"_model.h5")
     
     #if dP.makeQuantizedTFlite:
-    makeQuantizedTFmodel(X_train, model, "name")
+    makeQuantizedTFmodel(X_train, model, name+"_model")
 
-    plotResults(history)
+    if plotResults == True:
+        plotResults(history)
 
     #testing accuracy on test dataset
     from sklearn.metrics import accuracy_score
@@ -72,10 +75,12 @@ def main():
     pred = np.argmax(model.predict(X_test), axis=-1)
 
     #Accuracy with the test data
-    from sklearn.metrics import accuracy_score
+    if plotResults == True:
+        from sklearn.metrics import accuracy_score
+        
     print(accuracy_score(labels, pred))
 
-    model.save("traffic_classifier.h5")
+    model.save(name+"_classifier.h5")
 
 
 #************************************
@@ -176,7 +181,7 @@ def makeQuantizedTFmodel(A, model, name):
     converter.inference_output_type = tf.uint8
     tflite_quant_model = converter.convert()
 
-    with open("name"+'.tflite', 'wb') as o:
+    with open(name+'.tflite', 'wb') as o:
         o.write(tflite_quant_model)
     
 #************************************
