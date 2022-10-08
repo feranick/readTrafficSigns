@@ -11,7 +11,7 @@ print(__doc__)
 
 import tkinter as tk
 import numpy as np
-import os, sys
+import os, sys, platform
 from tkinter import filedialog
 from tkinter import *
 from PIL import ImageTk, Image
@@ -28,9 +28,13 @@ def DataML():
 def main():
     
     name = "roadSign"
-    #load the trained model to classify sign
-    from keras.models import load_model
-    model = load_model(name+"_classifier.h5")
+    useTFlitePred = False
+    TFliteRuntime = False
+    runCoralEdge = False
+    
+    model = loadModel(name, useTFlitePred, TFliteRuntime, runCoralEdge)
+    #from keras.models import load_model
+    #model = load_model(name+"_classifier.h5")
 
     #initialise GUI
     top=tk.Tk()
@@ -84,7 +88,44 @@ def main():
     heading.pack()
     top.mainloop()
     
-    
+#************************************
+# Load saved models
+#************************************
+def loadModel(name, useTFlitePred, TFliteRuntime, runCoralEdge):
+    if platform.system() == 'Linux':
+        edgeTPUSharedLib = "libedgetpu.so.1"
+    if platform.system() == 'Darwin':
+        edgeTPUSharedLib = "libedgetpu.1.dylib"
+    if platform.system() == 'Windows':
+        edgeTPUSharedLib = "edgetpu.dll"
+
+    if TFliteRuntime:
+        import tflite_runtime.interpreter as tflite
+        # model here is intended as interpreter
+        if runCoralEdge:
+            print(" Running on Coral Edge TPU")
+            try:
+                model = tflite.Interpreter(model_path=name+'model_edgetpu.tflite',
+                    experimental_delegates=[tflite.load_delegate(edgeTPUSharedLib,{})])
+            except:
+                print(" Coral Edge TPU not found. Please make sure it's connected. ")
+        else:
+            print("useTFlitePred", "RUNTIME")
+            model = tflite.Interpreter(model_path=name+'_model.tflite')
+        model.allocate_tensors()
+    else:
+        #getTFVersion(dP)
+        import tensorflow as tf
+        if useTFlitePred:
+            print("useTFlitePred")
+            # model here is intended as interpreter
+            model = tf.lite.Interpreter(model_path=name+'_model.tflite')
+            model.allocate_tensors()
+        else:
+            model = tf.keras.models.load_model(name+"_classifier.h5")
+    return model
+
+
 #************************************
 # Define classes of labels
 #************************************
