@@ -50,21 +50,6 @@ def main():
     #from keras.models import load_model
     #model = load_model(name+"_classifier.h5")
 
-    def classify(file_path):
-        global label_packed
-        filelabel.configure(foreground='#011638', text=file_path)
-        image = Image.open(file_path)
-        image = image.resize((30,30))
-        image = np.expand_dims(image, axis=0)
-        image = np.array(image)
-        #pred = model.predict_classes([image])[0]
-        #pred = np.argmax(model.predict([image]), axis=-1)[0]
-        pred = np.argmax(getPredictions(image, model, useTFlitePred), axis=-1)[0]
-        sign = classes()[pred+1]
-        print(" Sign:\033[1m",sign,"\033[0m - File:",file_path)
-        
-        label.configure(foreground='#011638', text=sign)
-
     def classify(image):
         global label_packed
         #filelabel.configure(foreground='#011638', text=file_path)
