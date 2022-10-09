@@ -149,12 +149,6 @@ def main():
         
         label.configure(foreground='#011638', text=sign)
 
-    def show_classify_button(file_path):
-        classify_b=Button(top,text="Classify Image",command=lambda: classify(file_path),padx=10,pady=5)
-        classify_b.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
-        classify_b.place(relx=0.79,rely=0.46)
-        
-        
     upload=Button(top,text="Upload an image",command=upload_image,padx=10,pady=5)
     upload.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
     upload.pack(side=BOTTOM,pady=50)
@@ -162,6 +156,7 @@ def main():
     startCamera=Button(top,text="Start camera",command=get_webcam_image,padx=10,pady=5)
     startCamera.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
     startCamera.pack(side=BOTTOM,pady=50)
+    startCamera.place(relx=0.79,rely=0.46)
 
     sign_image.pack(side=BOTTOM,expand=True)
     label.pack(side=BOTTOM,expand=True)
