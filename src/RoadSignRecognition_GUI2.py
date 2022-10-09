@@ -66,7 +66,6 @@ def main():
         
         label.configure(foreground='#011638', text=sign)
 
-
     def show_classify_button(file_path):
         classify_b=Button(top,text="Classify Image",command=lambda: classify(file_path),padx=10,pady=5)
         classify_b.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
@@ -75,18 +74,16 @@ def main():
     def upload_image():
         file_path=filedialog.askopenfilename()
         uploaded=Image.open(file_path)
-        uploaded.thumbnail(((top.winfo_width()/2.25),(top.winfo_height()/2.25)))
         process_Image(uploaded)
-        #return uploaded
            
     def get_webcam_image():
-        image=getImage()
-        uploaded=Image.open('saved_img.jpg')
-        uploaded.thumbnail(((top.winfo_width()/2.25),(top.winfo_height()/2.25)))
+        img = getImage()
+        uploaded = Image.fromarray(img)
+        #uploaded=Image.open('saved_img.jpg')
         process_Image(uploaded)
-        #return uploaded
-        
+                
     def process_Image(uploaded):
+        uploaded.thumbnail(((top.winfo_width()/2.25),(top.winfo_height()/2.25)))
         im=ImageTk.PhotoImage(uploaded)
         sign_image.configure(image=im)
         sign_image.image=im
