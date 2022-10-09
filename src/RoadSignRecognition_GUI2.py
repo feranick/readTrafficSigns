@@ -27,8 +27,8 @@ def RoadSignRecognition_GUI():
 def main():
     
     name = "roadSign"
-    useTFlitePred = False
-    TFliteRuntime = False
+    useTFlitePred = True
+    TFliteRuntime = True
     runCoralEdge = False
 
     #initialise GUI
@@ -65,6 +65,23 @@ def main():
         
         label.configure(foreground='#011638', text=sign)
 
+    def classify(image):
+        global label_packed
+        #filelabel.configure(foreground='#011638', text=file_path)
+        #image = Image.open(file_path)
+        image = image.resize((30,30))
+        image = np.expand_dims(image, axis=0)
+        image = np.array(image)
+        #pred = model.predict_classes([image])[0]
+        #pred = np.argmax(model.predict([image]), axis=-1)[0]
+        pred = np.argmax(getPredictions(image, model, useTFlitePred), axis=-1)[0]
+        sign = classes()[pred+1]
+        #print(" Sign:\033[1m",sign,"\033[0m - File:",file_path)
+        print(" Sign:\033[1m",sign,"\033[0m")
+        
+        label.configure(foreground='#011638', text=sign)
+
+
     def show_classify_button(file_path):
         classify_b=Button(top,text="Classify Image",command=lambda: classify(file_path),padx=10,pady=5)
         classify_b.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
@@ -74,22 +91,36 @@ def main():
         file_path=filedialog.askopenfilename()
         uploaded=Image.open(file_path)
         uploaded.thumbnail(((top.winfo_width()/2.25),(top.winfo_height()/2.25)))
+        process_Image(uploaded)
+        #return uploaded
+           
+    def get_webcam_image():
+        image=getImage()
+        uploaded=Image.open('saved_img.jpg')
+        uploaded.thumbnail(((top.winfo_width()/2.25),(top.winfo_height()/2.25)))
+        process_Image(uploaded)
+        #return uploaded
+        
+    def process_Image(uploaded):
         im=ImageTk.PhotoImage(uploaded)
-
         sign_image.configure(image=im)
         sign_image.image=im
         label.configure(text='')
         filelabel.configure(text='')
         #show_classify_button(file_path)
         try:
-            classify(file_path)
+            classify(uploaded)
         except:
-           print("Classification failed")
-
+            print("Classification failed")
+        
     upload=Button(top,text="Upload an image",command=upload_image,padx=10,pady=5)
     upload.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
-
     upload.pack(side=BOTTOM,pady=50)
+
+    startCamera=Button(top,text="Start camera",command=get_webcam_image,padx=10,pady=5)
+    startCamera.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
+    startCamera.pack(side=BOTTOM,pady=50)
+
     sign_image.pack(side=BOTTOM,expand=True)
     label.pack(side=BOTTOM,expand=True)
     filelabel.pack(side=BOTTOM,expand=True)
@@ -211,6 +242,27 @@ def classes():
             42:'End of no passing',
             43:'End no passing veh > 3.5 tons' }
     return classes
+
+#************************************
+# Get image from webcam
+#************************************
+
+def getImage():
+    import cv2
+    key = cv2. waitKey(1)
+    webcam = cv2.VideoCapture(0)
+    check, frame = webcam.read()
+    #print(check) #prints true as long as the webcam is running
+    #print(frame) #prints matrix values of each framecd
+    #cv2.imshow("Capturing", frame)
+    #key = cv2.waitKey(1)
+    #cv2.imwrite(filename='saved_img.jpg', img=frame)
+    webcam.release()
+    #img_new = cv2.imread('saved_img.jpg', cv2.IMREAD_GRAYSCALE)
+    #img_new = cv2.imshow("Captured Image", img_new)
+    #cv2.waitKey(1650)
+    cv2.destroyAllWindows()
+    return frame
 
 #************************************
 # Main initialization routine
