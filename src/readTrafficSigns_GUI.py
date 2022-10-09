@@ -90,7 +90,7 @@ def main():
         print( "You need a runing instance of X Windows, Abort\n")
         return
         
-    top.geometry('800x600')
+    top.geometry('800x700')
     top.title('Traffic sign classification')
     top.configure(background='#CDCDCD')
 
@@ -102,27 +102,6 @@ def main():
     #from keras.models import load_model
     #model = load_model(name+"_classifier.h5")
 
-    def classify(image):
-        global label_packed
-        #filelabel.configure(foreground='#011638', text=file_path)
-        #image = Image.open(file_path)
-        image = image.resize((30,30))
-        image = np.expand_dims(image, axis=0)
-        image = np.array(image)
-        #pred = model.predict_classes([image])[0]
-        #pred = np.argmax(model.predict([image]), axis=-1)[0]
-        pred = np.argmax(getPredictions(image, model), axis=-1)[0]
-        sign = classes()[pred+1]
-        #print(" Sign:\033[1m",sign,"\033[0m - File:",file_path)
-        print(" Sign:\033[1m",sign,"\033[0m")
-        
-        label.configure(foreground='#011638', text=sign)
-
-    def show_classify_button(file_path):
-        classify_b=Button(top,text="Classify Image",command=lambda: classify(file_path),padx=10,pady=5)
-        classify_b.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
-        classify_b.place(relx=0.79,rely=0.46)
-
     def upload_image():
         file_path=filedialog.askopenfilename()
         uploaded=Image.open(file_path)
@@ -130,7 +109,9 @@ def main():
            
     def get_webcam_image():
         img = getImage()
-        uploaded = Image.fromarray(img)
+        width = int((img.shape[1]-img.shape[0])/2)
+        width2 = int((img.shape[1]+img.shape[0])/2)
+        uploaded = Image.fromarray(img[:,width:width2,:])
         #uploaded=Image.open('saved_img.jpg')
         process_Image(uploaded)
                 
@@ -146,6 +127,33 @@ def main():
             classify(uploaded)
         except:
             print("Classification failed")
+            
+    def classify(image):
+        #global label_packed
+        #filelabel.configure(foreground='#011638', text=file_path)
+        #image = Image.open(file_path)
+        image = image.resize((30,30))
+        
+        #im=ImageTk.PhotoImage(image)
+        #sign_image.configure(image=im)
+        #sign_image.image=im
+        
+        image = np.expand_dims(image, axis=0)
+        image = np.array(image)
+        #pred = model.predict_classes([image])[0]
+        #pred = np.argmax(model.predict([image]), axis=-1)[0]
+        pred = np.argmax(getPredictions(image, model), axis=-1)[0]
+        sign = classes()[pred+1]
+        #print(" Sign:\033[1m",sign,"\033[0m - File:",file_path)
+        print(" Sign:\033[1m",sign,"\033[0m")
+        
+        label.configure(foreground='#011638', text=sign)
+
+    def show_classify_button(file_path):
+        classify_b=Button(top,text="Classify Image",command=lambda: classify(file_path),padx=10,pady=5)
+        classify_b.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
+        classify_b.place(relx=0.79,rely=0.46)
+        
         
     upload=Button(top,text="Upload an image",command=upload_image,padx=10,pady=5)
     upload.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
