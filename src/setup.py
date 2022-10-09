@@ -1,12 +1,12 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='RoadSignRecognition',
+    name='readTrafficSigns',
     packages=find_packages(),
-    install_requires=['numpy', 'h5py', 'tensorflow', 'tkinter'],
-    entry_points={'console_scripts' : ['RoadSignRecognition=RoadSignRecognition:RoadSignRecognition','RoadSignRecognition_GUI=RoadSignRecognition_GUI:RoadSignRecognition_GUI']},
-    py_modules=['DataML','ConvertLabel','GetClasses','libDataML'],
-    version='20221008a',
+    install_requires=['numpy', 'h5py', 'tensorflow', 'tkinter', 'pillow', 'opencv-contrib-python'],
+    entry_points={'console_scripts' : ['readTrafficSigns=readTrafficSigns:readTrafficSigns','readTrafficSigns_GUI=readTrafficSigns_GUI:readTrafficSigns_GUI']},
+    py_modules=[],
+    version='20221009a',
     description='Recognize Road Signs',
     long_description= """ Recognize Road Signs """,
     author='Nicola Ferralis',

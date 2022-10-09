@@ -23,7 +23,7 @@ from keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Dropout
 #***************************************************
 # This is needed for installation through pip
 #***************************************************
-def RoadSignRecognition():
+def readTrafficSigns():
     main()
     
 #************************************
@@ -80,7 +80,7 @@ def main():
         
     print(accuracy_score(labels, pred))
 
-    model.save(name+"_classifier.h5")
+    model.save(name+"_model_classifier.h5")
 
 
 #************************************
