@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import cv2
 import tensorflow as tf
 from PIL import Image
-import os, sys
+import os, sys, configparser
 from sklearn.model_selection import train_test_split
 from keras.utils import to_categorical
 from keras.models import Sequential, load_model
@@ -25,33 +25,81 @@ from keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Dropout
 #***************************************************
 def readTrafficSigns():
     main()
-    
+
+#************************************
+# Parameters
+#************************************
+class Conf():
+    def __init__(self):
+        confFileName = "readTrafficSigns.ini"
+        self.configFile = os.getcwd()+"/"+confFileName
+        self.conf = configparser.ConfigParser()
+        self.conf.optionxform = str
+        if os.path.isfile(self.configFile) is False:
+            print("\n Configuration file: \""+confFileName+"\" does not exist: Creating one.\n")
+            self.createConfig()
+        self.readConfig(self.configFile)
+        self.model_directory = "./"
+            
+    def rTSDef(self):
+        self.conf['Parameters'] = {
+            'name' : 'roadSign',
+            'num_classes' : 43,
+            'epochs' : 3,
+            'batch_size' : 32,
+            }
+        
+    def sysDef(self):
+        self.conf['System'] = {
+            'plotResults' : False,
+            }
+
+    def readConfig(self,configFile):
+            #try:
+            self.conf.read(configFile)
+            self.rTSDef = self.conf['Parameters']
+            self.sysDef = self.conf['System']
+            self.name = self.rTSDef['name']
+            self.num_classes = self.conf.getint('Parameters','num_classes')
+            self.epochs = self.conf.getint('Parameters','epochs')
+            self.batch_size = self.conf.getint('Parameters','batch_size')
+            self.plotResults = self.conf.getboolean('System','plotResults')
+            
+            #except:
+            #    print(" Error in reading configuration file. Please check it\n")
+            
+    # Create configuration file
+    def createConfig(self):
+        try:
+            self.rTSDef()
+            self.sysDef()
+            with open(self.configFile, 'w') as configfile:
+                self.conf.write(configfile)
+        except:
+            print("Error in creating configuration file")
+
 #************************************
 # Main
 #************************************
 def main():
+    dP = Conf()
     
-    num_classes = 43
-    epochs = 3
-    name = "roadSign"
-    plotResults = False
-    
-    X_train, X_test, y_train, y_test = readLearnData(num_classes, "Train")
+    X_train, X_test, y_train, y_test = readLearnData("Train")
     print(X_train.shape, X_test.shape, y_train.shape, y_test.shape)
 
     #Converting the labels into one hot encoding
-    y_train = to_categorical(y_train, 43)
-    y_test = to_categorical(y_test, 43)
+    y_train = to_categorical(y_train, dP.num_classes)
+    y_test = to_categorical(y_test, dP.num_classes)
 
-    model = cnn_model(num_classes, X_train.shape[1:])
+    model = cnn_model(dP.num_classes, X_train.shape[1:])
     
-    history = model.fit(X_train, y_train, batch_size=32, epochs=epochs, validation_data=(X_test, y_test))
-    model.save(name+"_model.h5")
+    history = model.fit(X_train, y_train, batch_size=dP.batch_size, epochs=dP.epochs, validation_data=(X_test, y_test))
+    model.save(dP.name+"_model.h5")
     
     #if dP.makeQuantizedTFlite:
-    makeQuantizedTFmodel(X_train, model, name+"_model")
+    makeQuantizedTFmodel(X_train, model, dP.name+"_model")
 
-    if plotResults == True:
+    if dP.plotResults == True:
         plotResults(history)
 
     #testing accuracy on test dataset
@@ -80,7 +128,7 @@ def main():
         
     print(accuracy_score(labels, pred))
 
-    model.save(name+"_model_classifier.h5")
+    model.save(dP.name+"_model_classifier.h5")
 
 
 #************************************
@@ -105,13 +153,14 @@ def cnn_model(num_classes, input_shape):
     return model
 
 
-def readLearnData(num_classes, type):
+def readLearnData(type):
+    dP = Conf()
     cur_path = os.getcwd()
     data = []
     labels = []
 
     #Retrieving the images and their labels
-    for i in range(num_classes):
+    for i in range(dP.num_classes):
         path = os.path.join(cur_path,type,str(i))
         images = os.listdir(path)
 

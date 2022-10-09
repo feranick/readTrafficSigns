@@ -10,7 +10,7 @@ print(__doc__)
 
 import tkinter as tk
 import numpy as np
-import os, sys, platform
+import os, sys, platform, configparser
 from tkinter import filedialog
 from tkinter import *
 from PIL import ImageTk, Image
@@ -22,14 +22,66 @@ def readTrafficSigns_GUI():
     main()
 
 #************************************
+# Parameters
+#************************************
+class Conf():
+    def __init__(self):
+        confFileName = "readTrafficSigns_GUI.ini"
+        self.configFile = os.getcwd()+"/"+confFileName
+        self.conf = configparser.ConfigParser()
+        self.conf.optionxform = str
+        if os.path.isfile(self.configFile) is False:
+            print(" Configuration file: \""+confFileName+"\" does not exist: Creating one.\n")
+            self.createConfig()
+        self.readConfig(self.configFile)
+        self.model_directory = "./"
+
+        if platform.system() == 'Linux':
+            self.edgeTPUSharedLib = "libedgetpu.so.1"
+        if platform.system() == 'Darwin':
+            self.edgeTPUSharedLib = "libedgetpu.1.dylib"
+        if platform.system() == 'Windows':
+            self.edgeTPUSharedLib = "edgetpu.dll"
+            
+    def rTSDef(self):
+        self.conf['Parameters'] = {
+            'name' : "roadSign",
+            }
+        
+    def sysDef(self):
+        self.conf['System'] = {
+            'useTFlitePred' : False,
+            'TFliteRuntime' : False,
+            'runCoralEdge' : False,
+            }
+
+    def readConfig(self,configFile):
+            #try:
+            self.conf.read(configFile)
+            self.rTSDef = self.conf['Parameters']
+            self.sysDef = self.conf['System']
+            self.name = self.rTSDef['name']
+            self.useTFlitePred = self.conf.getboolean('System','useTFlitePred')
+            self.TFliteRuntime = self.conf.getboolean('System','TFliteRuntime')
+            self.runCoralEdge = self.conf.getboolean('System','runCoralEdge')
+            #except:
+            #    print(" Error in reading configuration file. Please check it\n")
+            
+    # Create configuration file
+    def createConfig(self):
+        try:
+            self.rTSDef()
+            self.sysDef()
+            with open(self.configFile, 'w') as configfile:
+                self.conf.write(configfile)
+        except:
+            print("Error in creating configuration file")
+
+#************************************
 # Main
 #************************************
 def main():
-    
-    name = "roadSign"
-    useTFlitePred = True
-    TFliteRuntime = True
-    runCoralEdge = False
+    dP = Conf()
 
     #initialise GUI
     try:
@@ -46,7 +98,7 @@ def main():
     filelabel=Label(top,background='#CDCDCD', font=('arial',15))
     sign_image = Label(top)
     
-    model = loadModel(name, useTFlitePred, TFliteRuntime, runCoralEdge)
+    model = loadModel()
     #from keras.models import load_model
     #model = load_model(name+"_classifier.h5")
 
@@ -59,7 +111,7 @@ def main():
         image = np.array(image)
         #pred = model.predict_classes([image])[0]
         #pred = np.argmax(model.predict([image]), axis=-1)[0]
-        pred = np.argmax(getPredictions(image, model, useTFlitePred), axis=-1)[0]
+        pred = np.argmax(getPredictions(image, model), axis=-1)[0]
         sign = classes()[pred+1]
         #print(" Sign:\033[1m",sign,"\033[0m - File:",file_path)
         print(" Sign:\033[1m",sign,"\033[0m")
@@ -114,45 +166,40 @@ def main():
 #************************************
 # Load saved models
 #************************************
-def loadModel(name, useTFlitePred, TFliteRuntime, runCoralEdge):
-    if platform.system() == 'Linux':
-        edgeTPUSharedLib = "libedgetpu.so.1"
-    if platform.system() == 'Darwin':
-        edgeTPUSharedLib = "libedgetpu.1.dylib"
-    if platform.system() == 'Windows':
-        edgeTPUSharedLib = "edgetpu.dll"
-
-    if TFliteRuntime:
+def loadModel():
+    dP = Conf()
+    if dP.TFliteRuntime:
         import tflite_runtime.interpreter as tflite
         # model here is intended as interpreter
-        if runCoralEdge:
+        if dP.runCoralEdge:
             print(" Running Tensorflow lite on Coral Edge TPU\n")
             try:
-                model = tflite.Interpreter(model_path=name+'_model_edgetpu.tflite',
-                    experimental_delegates=[tflite.load_delegate(edgeTPUSharedLib,{})])
+                model = tflite.Interpreter(model_path=dP.name+'_model_edgetpu.tflite',
+                    experimental_delegates=[tflite.load_delegate(dP.edgeTPUSharedLib,{})])
             except:
                 print(" Coral Edge TPU not found or compiled model not found. \n")
         else:
             print(" Using Tensoflow lite runtime\n")
-            model = tflite.Interpreter(model_path=name+'_model.tflite')
+            model = tflite.Interpreter(model_path=dP.name+'_model.tflite')
         model.allocate_tensors()
     else:
         #getTFVersion(dP)
         import tensorflow as tf
-        if useTFlitePred:
+        if dP.useTFlitePred:
             print("Using Tensorflow lite\n")
             # model here is intended as interpreter
-            model = tf.lite.Interpreter(model_path=name+'_model.tflite')
+            model = tf.lite.Interpreter(model_path=dP.name+'_model.tflite')
             model.allocate_tensors()
         else:
-            model = tf.keras.models.load_model(name+"_classifier.h5")
+            model = tf.keras.models.load_model(dP.name+"_classifier.h5")
     return model
 
 #************************************
 # Make prediction based on framework
 #************************************
-def getPredictions(R, model, useTFlitePred):
-    if useTFlitePred:
+def getPredictions(R, model):
+    dP = Conf()
+    if dP.useTFlitePred:
         interpreter = model  #needed to keep consistency with documentation
         # Get input and output tensors.
         input_details = interpreter.get_input_details()
