@@ -1,14 +1,12 @@
 # readTrafficSigns
 
 Features:
-1. Save models
-2. Decoupled train/predict (with GUI for the latter)
-3. Support for embedded platforms (Coral/EdgeTPU, tensorflow lite)
-4. Installable setup.py
-
-To do:
-1. INI file for configuration parameters
-2. Pull live images from camera. 
+1. Prediction using uploaded images or from webcam
+2. Save models
+3. Decoupled train/predict (with GUI for the latter)
+4. Support for embedded platforms (Coral/EdgeTPU, tensorflow lite)
+5. Installable setup.py
+6. INI file for configuration parameters (no need to change the source once installed)
 
 Current:
 Based on the code available here:
