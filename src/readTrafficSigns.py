@@ -94,7 +94,7 @@ def main():
     model = cnn_model(dP.num_classes, X_train.shape[1:])
     
     history = model.fit(X_train, y_train, batch_size=dP.batch_size, epochs=dP.epochs, validation_data=(X_test, y_test))
-    model.save(dP.name+"_model.h5")
+    #model.save(dP.name+"_model.h5")
     
     #if dP.makeQuantizedTFlite:
     makeQuantizedTFmodel(X_train, model, dP.name+"_model")
