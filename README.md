@@ -2,6 +2,7 @@
 
 Features:
 1. Prediction using uploaded images or from webcam
+2. Prediction on live video streams (rate > 0.2 s) from camera
 2. Save models
 3. Decoupled train/predict (with GUI for the latter)
 4. Support for embedded platforms (Coral/EdgeTPU, tensorflow lite)
