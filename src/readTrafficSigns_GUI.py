@@ -56,16 +56,16 @@ class Conf():
             }
 
     def readConfig(self,configFile):
-            #try:
-            self.conf.read(configFile)
-            self.rTSDef = self.conf['Parameters']
-            self.sysDef = self.conf['System']
-            self.name = self.rTSDef['name']
-            self.useTFlitePred = self.conf.getboolean('System','useTFlitePred')
-            self.TFliteRuntime = self.conf.getboolean('System','TFliteRuntime')
-            self.runCoralEdge = self.conf.getboolean('System','runCoralEdge')
-            #except:
-            #    print(" Error in reading configuration file. Please check it\n")
+            try:
+                self.conf.read(configFile)
+                self.rTSDef = self.conf['Parameters']
+                self.sysDef = self.conf['System']
+                self.name = self.rTSDef['name']
+                self.useTFlitePred = self.conf.getboolean('System','useTFlitePred')
+                self.TFliteRuntime = self.conf.getboolean('System','TFliteRuntime')
+                self.runCoralEdge = self.conf.getboolean('System','runCoralEdge')
+            except:
+                print(" Error in reading configuration file. Please check it\n")
             
     # Create configuration file
     def createConfig(self):
