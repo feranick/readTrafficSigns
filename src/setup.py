@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='readTrafficSigns',
     packages=find_packages(),
-    install_requires=['numpy', 'h5py', 'tensorflow', 'tkinter', 'pillow', 'opencv-contrib-python'],
+    install_requires=['numpy', 'h5py', 'tensorflow', 'pillow', 'opencv-contrib-python'],
     entry_points={'console_scripts' : ['readTrafficSigns=readTrafficSigns:readTrafficSigns','readTrafficSigns_GUI=readTrafficSigns_GUI:readTrafficSigns_GUI']},
     py_modules=[],
     version='20221009a',
