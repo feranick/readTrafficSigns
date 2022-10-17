@@ -194,7 +194,7 @@ def loadModel():
             model = tf.lite.Interpreter(model_path=dP.name+'_model.tflite')
             model.allocate_tensors()
         else:
-            model = tf.keras.models.load_model(dP.name+"_classifier.h5")
+            model = tf.keras.models.load_model(dP.name+'_model_classifier.h5')
     return model
 
 #************************************
