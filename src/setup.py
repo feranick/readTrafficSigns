@@ -6,7 +6,7 @@ setup(
     install_requires=['numpy', 'h5py', 'tensorflow', 'pillow', 'opencv-contrib-python'],
     entry_points={'console_scripts' : ['readTrafficSigns=readTrafficSigns:readTrafficSigns','readTrafficSigns_GUI=readTrafficSigns_GUI:readTrafficSigns_GUI']},
     py_modules=['readTrafficSigns','readTrafficSigns_GUI'],
-    version='20221017a',
+    version='20221017b',
     description='Recognize Road Signs',
     long_description= """ Recognize Road Signs """,
     author='Nicola Ferralis',
