@@ -155,10 +155,18 @@ def main():
         image = np.array(image)
         #pred = model.predict_classes([image])[0]
         #pred = np.argmax(model.predict([image]), axis=-1)[0]
-        pred = np.argmax(getPredictions(image, model), axis=-1)[0]
+        predictions = getPredictions(image, model)
+        pred_class = np.argmax(predictions, axis=-1)
+        pred = pred_class[0]
+        
+        if dP.useTFlitePred:
+            predProb = np.round(100*predictions[0][pred_class]/255,2)[0]
+        else:
+            predProb = np.round(100*predictions[0][pred_class],2)[0]
+                        
         sign = classes()[pred+1]
         #print(" Sign:\033[1m",sign,"\033[0m - File:",file_path)
-        print(" Sign:\033[1m",sign,"\033[0m")
+        print(" Sign:\033[1m",sign,"\033[0m\t\t\tProbability: ",predProb)
         
         label.configure(foreground='#011638', text=sign)
 
