@@ -10,7 +10,7 @@ print(__doc__)
 
 import tkinter as tk
 import numpy as np
-import os, sys, platform, configparser
+import os, sys, platform, configparser, cv2
 from tkinter import filedialog
 from tkinter import *
 from PIL import ImageTk, Image
@@ -89,6 +89,12 @@ def main():
     except:
         print( "You need a runing instance of X Windows, Abort\n")
         return
+    
+    try:
+        if self.isOpen:
+            pass
+    except:
+        cam = Camera()
         
     top.geometry('800x700')
     top.title('Traffic sign classification')
@@ -108,7 +114,8 @@ def main():
         process_Image(uploaded)
            
     def get_webcam_image():
-        img = getImage()
+        #img = getImage()
+        img = cam.getImage()
         width = int((img.shape[1]-img.shape[0])/2)
         width2 = int((img.shape[1]+img.shape[0])/2)
         uploaded = Image.fromarray(img[:,width:width2,:])
@@ -224,6 +231,45 @@ def getPredictions(R, model):
         predictions = model.predict(R)
     return predictions
 
+#************************************
+# Get image from webcam
+#************************************
+class Camera():
+    def __init__(self):
+        self.cam = cv2.VideoCapture(0)
+        #self.check, self.frame = self.cam.read()
+        print("Camera is OPEN")
+        self.isOpen = True
+    
+    def releaseCam(self):
+        self.cam.release()
+        cv2.destroyAllWindows()
+    
+    def getImage(self):
+        self.check, self.frame = self.cam.read()
+        print("Camera is OPEN")
+        return self.frame
+        
+    def destroy():
+        self.cam.release()
+
+
+def old_getImage():
+    import cv2
+    #key = cv2. waitKey(1)
+    cam = cv2.VideoCapture(0)
+    check, frame = cam.read()
+    #print(check) #prints true as long as the webcam is running
+    #print(frame) #prints matrix values of each framecd
+    #cv2.imshow("Capturing", frame)
+    #key = cv2.waitKey(1)
+    #cv2.imwrite(filename='saved_img.jpg', img=frame)
+    cam.release()
+    #img_new = cv2.imread('saved_img.jpg', cv2.IMREAD_GRAYSCALE)
+    #img_new = cv2.imshow("Captured Image", img_new)
+    #cv2.waitKey(1650)
+    cv2.destroyAllWindows()
+    return frame
 
 #************************************
 # Define classes of labels
@@ -275,26 +321,6 @@ def classes():
             43:'End no passing veh > 3.5 tons' }
     return classes
 
-#************************************
-# Get image from webcam
-#************************************
-
-def getImage():
-    import cv2
-    key = cv2. waitKey(1)
-    webcam = cv2.VideoCapture(0)
-    check, frame = webcam.read()
-    #print(check) #prints true as long as the webcam is running
-    #print(frame) #prints matrix values of each framecd
-    #cv2.imshow("Capturing", frame)
-    #key = cv2.waitKey(1)
-    #cv2.imwrite(filename='saved_img.jpg', img=frame)
-    webcam.release()
-    #img_new = cv2.imread('saved_img.jpg', cv2.IMREAD_GRAYSCALE)
-    #img_new = cv2.imshow("Captured Image", img_new)
-    #cv2.waitKey(1650)
-    cv2.destroyAllWindows()
-    return frame
 
 #************************************
 # Main initialization routine
