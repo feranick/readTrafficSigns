@@ -10,7 +10,7 @@ print(__doc__)
 
 import tkinter as tk
 import numpy as np
-import os, sys, platform, configparser, cv2
+import os, sys, platform, configparser, time, cv2, threading
 from tkinter import filedialog
 from tkinter import *
 from PIL import ImageTk, Image
@@ -46,6 +46,7 @@ class Conf():
     def rTSDef(self):
         self.conf['Parameters'] = {
             'name' : "roadSign",
+            'intervalStream' : 0.2,
             }
         
     def sysDef(self):
@@ -61,6 +62,7 @@ class Conf():
                 self.rTSDef = self.conf['Parameters']
                 self.sysDef = self.conf['System']
                 self.name = self.rTSDef['name']
+                self.intervalStream = self.conf.getfloat('Parameters','intervalStream')
                 self.useTFlitePred = self.conf.getboolean('System','useTFlitePred')
                 self.TFliteRuntime = self.conf.getboolean('System','TFliteRuntime')
                 self.runCoralEdge = self.conf.getboolean('System','runCoralEdge')
@@ -107,7 +109,7 @@ def main():
     model = loadModel()
     #from keras.models import load_model
     #model = load_model(name+"_classifier.h5")
-
+    
     def upload_image():
         file_path=filedialog.askopenfilename()
         uploaded=Image.open(file_path)
@@ -121,6 +123,11 @@ def main():
         uploaded = Image.fromarray(img[:,width:width2,:])
         #uploaded=Image.open('saved_img.jpg')
         process_Image(uploaded)
+        
+    loop = RepeatedTimer(dP.intervalStream,get_webcam_image)
+    
+    def get_webcam_stream():
+        loop.start()
                 
     def process_Image(uploaded):
         uploaded.thumbnail(((top.winfo_width()/2.25),(top.winfo_height()/2.25)))
@@ -129,7 +136,6 @@ def main():
         sign_image.image=im
         label.configure(text='')
         filelabel.configure(text='')
-        #show_classify_button(file_path)
         try:
             classify(uploaded)
         except:
@@ -164,13 +170,27 @@ def main():
     startCamera.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
     startCamera.pack(side=BOTTOM,pady=50)
     startCamera.place(relx=0.79,rely=0.46)
-
+    
+    startStream=Button(top,text="Start camera stream",command=get_webcam_stream,padx=10,pady=5)
+    startStream.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
+    startStream.pack(side=BOTTOM,pady=50)
+    startStream.place(relx=0.79,rely=0.30)
+    
     sign_image.pack(side=BOTTOM,expand=True)
     label.pack(side=BOTTOM,expand=True)
     filelabel.pack(side=BOTTOM,expand=True)
     heading = Label(top, text="Know Your Traffic Sign",pady=20, font=('arial',20,'bold'))
     heading.configure(background='#CDCDCD',foreground='#364156')
     heading.pack()
+    
+    def on_closing():
+        if loop.is_running:
+            loop.stop()
+        cam.releaseCam()
+        top.destroy()
+            
+    
+    top.protocol("WM_DELETE_WINDOW", on_closing)
     top.mainloop()
     
 #************************************
@@ -237,8 +257,6 @@ def getPredictions(R, model):
 class Camera():
     def __init__(self):
         self.cam = cv2.VideoCapture(0)
-        #self.check, self.frame = self.cam.read()
-        print("Camera is OPEN")
         self.isOpen = True
     
     def releaseCam(self):
@@ -247,29 +265,41 @@ class Camera():
     
     def getImage(self):
         self.check, self.frame = self.cam.read()
-        print("Camera is OPEN")
         return self.frame
         
     def destroy():
         self.cam.release()
+    
+#************************************
+# Repeating method
+#************************************
 
+class RepeatedTimer(object):
+    def __init__(self, interval, function, *args, **kwargs):
+        self._timer = None
+        self.interval = interval
+        self.function = function
+        self.args = args
+        self.kwargs = kwargs
+        self.is_running = False
+        self.next_call = time.time()
+        #self.start()  #Enable for starting upon initialization
 
-def old_getImage():
-    import cv2
-    #key = cv2. waitKey(1)
-    cam = cv2.VideoCapture(0)
-    check, frame = cam.read()
-    #print(check) #prints true as long as the webcam is running
-    #print(frame) #prints matrix values of each framecd
-    #cv2.imshow("Capturing", frame)
-    #key = cv2.waitKey(1)
-    #cv2.imwrite(filename='saved_img.jpg', img=frame)
-    cam.release()
-    #img_new = cv2.imread('saved_img.jpg', cv2.IMREAD_GRAYSCALE)
-    #img_new = cv2.imshow("Captured Image", img_new)
-    #cv2.waitKey(1650)
-    cv2.destroyAllWindows()
-    return frame
+    def _run(self):
+        self.is_running = False
+        self.start()
+        self.function(*self.args, **self.kwargs)
+
+    def start(self):
+        if not self.is_running:
+            self.next_call += self.interval
+            self._timer = threading.Timer(self.next_call - time.time(), self._run)
+            self._timer.start()
+            self.is_running = True
+
+    def stop(self):
+        self._timer.cancel()
+        self.is_running = False
 
 #************************************
 # Define classes of labels
