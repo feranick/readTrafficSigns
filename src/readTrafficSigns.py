@@ -45,7 +45,7 @@ class Conf():
         self.conf['Parameters'] = {
             'name' : 'roadSign',
             'num_classes' : 43,
-            'epochs' : 3,
+            'epochs' : 40,
             'batch_size' : 32,
             }
         
