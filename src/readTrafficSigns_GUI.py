@@ -156,7 +156,7 @@ def main():
         image = np.array(image)
         #pred = model.predict_classes([image])[0]
         #pred = np.argmax(model.predict([image]), axis=-1)[0]
-        predictions = getPredictions(image, model)
+        predictions, probabilities = getPredictions(image, model)
         pred_class = np.argmax(predictions, axis=-1)
         pred = pred_class[0]
         prob = 100*predictions[0][pred_class]
@@ -259,8 +259,8 @@ def getPredictions(R, model):
     else:
         predictions = model.predict(R)
         
-    #probabilities = scipy.special.softmax(predictions.astype('double'))
-    return predictions
+    probabilities = scipy.special.softmax(predictions.astype('double'))
+    return predictions, probabilities
 
 #************************************
 # Get image from webcam
