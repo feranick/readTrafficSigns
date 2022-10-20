@@ -156,6 +156,7 @@ def main():
         image = np.array(image)
         #pred = model.predict_classes([image])[0]
         #pred = np.argmax(model.predict([image]), axis=-1)[0]
+        
         predictions, probabilities = getPredictions(image, model)
         pred_class = np.argmax(predictions, axis=-1)
         pred = pred_class[0]
@@ -166,7 +167,8 @@ def main():
                         
         sign = classes()[pred+1]
         #print(" Sign:\033[1m",sign,"\033[0m - File:",file_path)
-        print(" Sign:\033[1m",sign,"\033[0m\t\t\tProbability: ",np.round(prob,2)[0])
+        print(" Sign:\033[1m",sign,"\033[0m\t\tProbability: ",np.round(prob,2)[0], \
+            " (",probabilities[0][pred_class][0],")")
         
         label.configure(foreground='#011638', text=sign)
 
