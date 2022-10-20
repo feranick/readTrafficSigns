@@ -113,24 +113,22 @@ def main():
     
     def upload_image():
         file_path=filedialog.askopenfilename()
-        uploaded=Image.open(file_path)
-        process_Image(uploaded)
+        img = cv2.imread(file_path)
+        process_Image(img)
            
     def get_webcam_image():
-        #img = getImage()
         img = cam.getImage()
-        width = int((img.shape[1]-img.shape[0])/2)
-        width2 = int((img.shape[1]+img.shape[0])/2)
-        uploaded = Image.fromarray(img[:,width:width2,:])
-        #uploaded=Image.open('saved_img.jpg')
-        process_Image(uploaded)
+        process_Image(img)
         
     loop = RepeatedTimer(dP.intervalStream,get_webcam_image)
     
     def get_webcam_stream():
         loop.start()
                 
-    def process_Image(uploaded):
+    def process_Image(img):
+        width = int((img.shape[1]-img.shape[0])/2)
+        width2 = int((img.shape[1]+img.shape[0])/2)
+        uploaded = Image.fromarray(img[:,width:width2,:])
         uploaded.thumbnail(((top.winfo_width()/2.25),(top.winfo_height()/2.25)))
         im=ImageTk.PhotoImage(uploaded)
         sign_image.configure(image=im)
@@ -143,15 +141,8 @@ def main():
             print("Classification failed")
             
     def classify(image):
-        #global label_packed
         #filelabel.configure(foreground='#011638', text=file_path)
-        #image = Image.open(file_path)
         image = image.resize((30,30))
-        
-        #im=ImageTk.PhotoImage(image)
-        #sign_image.configure(image=im)
-        #sign_image.image=im
-        
         image = np.expand_dims(image, axis=0)
         image = np.array(image)
         #pred = model.predict_classes([image])[0]
@@ -199,7 +190,6 @@ def main():
         cam.releaseCam()
         top.destroy()
             
-    
     top.protocol("WM_DELETE_WINDOW", on_closing)
     top.mainloop()
     
