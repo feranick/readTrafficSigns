@@ -146,7 +146,7 @@ def cnn_model(input_shape):
     dP = Conf()
     if dP.custom_optimizer:
         print(" \nUsing custom Adam optimizer, with learning_rate="+str(dP.l_rate)+" and decay rate="+str(dP.l_rdecay)+"\n")
-        optim = keras.optimizers.Adam(learning_rate=dP.l_rate, beta_1=0.9,
+        optim = tf.keras.optimizers.Adam(learning_rate=dP.l_rate, beta_1=0.9,
                     beta_2=0.999, epsilon=1e-08,
                     decay=dP.l_rdecay,
                     amsgrad=False)
