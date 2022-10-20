@@ -106,7 +106,6 @@ def main():
     filelabel=Label(top,background='#CDCDCD', font=('arial',15))
     sign_image = Label(top)
     label=Label(top,background='#CDCDCD', font=('arial',15,'bold'))
-    chkBtnStopSign = tk.IntVar()
     
     model = loadModel()
 
@@ -124,11 +123,7 @@ def main():
     def get_webcam_stream():
         loop.start()
                 
-    def process_Image(image):
-        if chkBtnStopSign.get() == 1:
-            img = stopSignDetect(image)
-        else:
-            img = image
+    def process_Image(img):
         width = int((img.shape[1]-img.shape[0])/2)
         width2 = int((img.shape[1]+img.shape[0])/2)
         uploaded = Image.fromarray(img[:,width:width2,:])
@@ -184,15 +179,12 @@ def main():
     startStream=Button(top,text="Start camera stream",command=get_webcam_stream,padx=10,pady=5)
     startStream.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
     #startStream.pack(side=BOTTOM,pady=50)
-    startStream.place(relx=0.79,rely=0.20)
+    startStream.place(relx=0.70,rely=0.20)
     
     stopStream=Button(top,text="Stop camera stream",command=stop_stream,padx=10,pady=5)
     stopStream.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
     #stopStream.pack(side=BOTTOM,pady=50)
-    stopStream.place(relx=0.79,rely=0.25)
-    
-    stopSignChkBtn = tk.Checkbutton(top, text='Stop Sign Detection',variable=chkBtnStopSign, onvalue=1, offvalue=0, command=get_webcam_stream)
-    stopSignChkBtn.place(relx=0.79,rely=0.30)
+    stopStream.place(relx=0.70,rely=0.25)
     
     sign_image.pack(side=BOTTOM,expand=True)
     label.pack(side=BOTTOM,expand=True)
@@ -268,26 +260,6 @@ def getPredictions(R, model):
         
     probabilities = scipy.special.softmax(predictions.astype('double'))
     return predictions, probabilities
-    
-#************************************
-# Sto Sign Detect
-#************************************
-def stopSignDetect(img):
-    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    stop_data = cv2.CascadeClassifier('stop_data.xml')
-
-    found = stop_data.detectMultiScale(img_gray,minSize =(20, 20))
-    if len(found) !=0:
-        print(" Stop sign found!")
-        for (x, y, width, height) in found:
-            cv2.rectangle(img_rgb, (x, y),
-					(x + height, y + width),
-					(0, 255, 0), 5)
-        img = img_rgb
-    else:
-        print(" NO Stop sign")
-    return img
 
 #************************************
 # Get image from webcam

@@ -1,5 +1,8 @@
 # readTrafficSigns
 
+readTrafficSings uses CNN (which can be trained with included script) to classify European traffic signs. 
+detectTrafficSigns uses HAAR algorithms for detecting a limited set of traffic signs (stop, traffic lights, speed limits). 
+
 Features
 =============
 1. Prediction using uploaded images or from webcam
@@ -18,8 +21,11 @@ https://data-flair.training/blogs/python-project-traffic-signs-recognition/
 Train/Validation/Test files available here:
 https://www.kaggle.com/datasets/meowmeowmeowmeowmeow/gtsrb-german-traffic-sign
 
-Stop Sign detection:
+Haar based detection: 
 https://www.geeksforgeeks.org/detect-an-object-with-opencv-python/
+
+Additional haar detection files
+https://github.com/cfizette/road-sign-cascades
 
 
 ===================================================
