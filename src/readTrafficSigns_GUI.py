@@ -158,15 +158,14 @@ def main():
         predictions = getPredictions(image, model)
         pred_class = np.argmax(predictions, axis=-1)
         pred = pred_class[0]
+        prob = 100*predictions[0][pred_class]
         
         if dP.useTFlitePred:
-            predProb = np.round(100*predictions[0][pred_class]/255,2)[0]
-        else:
-            predProb = np.round(100*predictions[0][pred_class],2)[0]
+            prob = prob/255
                         
         sign = classes()[pred+1]
         #print(" Sign:\033[1m",sign,"\033[0m - File:",file_path)
-        print(" Sign:\033[1m",sign,"\033[0m\t\t\tProbability: ",predProb)
+        print(" Sign:\033[1m",sign,"\033[0m\t\t\tProbability: ",np.round(prob,2)[0])
         
         label.configure(foreground='#011638', text=sign)
 
@@ -254,6 +253,7 @@ def getPredictions(R, model):
         # The function `get_tensor()` returns a copy of the tensor data.
         # Use `tensor()` in order to get a pointer to the tensor.
         predictions = interpreter.get_tensor(output_details[0]['index'])
+        #probabilities = tf.math.softmax(predictions.astype('double')).numpy()
         
     else:
         predictions = model.predict(R)
