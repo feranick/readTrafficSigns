@@ -48,6 +48,9 @@ class Conf():
             'num_classes' : 43,
             'epochs' : 40,
             'batch_size' : 32,
+            'custom_optimizer' : True,
+            'l_rate' : 0.001,
+            'l_rdecay' : 1e-4,
             }
         
     def sysDef(self):
@@ -65,6 +68,9 @@ class Conf():
             self.num_classes = self.conf.getint('Parameters','num_classes')
             self.epochs = self.conf.getint('Parameters','epochs')
             self.batch_size = self.conf.getint('Parameters','batch_size')
+            self.custom_optimizer = self.conf.getboolean('Parameters','custom_optimizer')
+            self.l_rate = self.conf.getfloat('Parameters','l_rate')
+            self.l_rdecay = self.conf.getfloat('Parameters','l_rdecay')
             self.plotResults = self.conf.getboolean('System','plotResults')
             
             #except:
@@ -93,7 +99,7 @@ def main():
     y_train = to_categorical(y_train, dP.num_classes)
     y_test = to_categorical(y_test, dP.num_classes)
 
-    model = cnn_model(dP.num_classes, X_train.shape[1:])
+    model = cnn_model(X_train.shape[1:])
     
     history = model.fit(X_train, y_train, batch_size=dP.batch_size, epochs=dP.epochs, validation_data=(X_test, y_test))
     #model.save(dP.name+"_model.h5")
@@ -136,7 +142,16 @@ def main():
 #************************************
 # Supporting methods
 #************************************
-def cnn_model(num_classes, input_shape):
+def cnn_model(input_shape):
+    dP = Conf()
+    if dP.custom_optimizer:
+        optim = keras.optimizers.Adam(learning_rate=dP.l_rate, beta_1=0.9,
+                    beta_2=0.999, epsilon=1e-08,
+                    decay=dP.l_rdecay,
+                    amsgrad=False)
+    else:
+        optim = 'adam'
+
     model = Sequential()
     model.add(Conv2D(filters=32, kernel_size=(5,5), activation='relu', input_shape=input_shape))
     model.add(Conv2D(filters=32, kernel_size=(5,5), activation='relu'))
@@ -149,9 +164,9 @@ def cnn_model(num_classes, input_shape):
     model.add(Flatten())
     model.add(Dense(256, activation='relu'))
     model.add(Dropout(rate=0.5))
-    model.add(Dense(num_classes, activation='softmax'))
+    model.add(Dense(dP.num_classes, activation='softmax'))
     #Compilation of the model
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer=optim, metrics=['accuracy'])
     return model
 
 
