@@ -44,7 +44,6 @@ class Conf():
             'intervalStream' : 0.2,
             }
         
-
     def readConfig(self,configFile):
             try:
                 self.conf.read(configFile)
@@ -105,17 +104,17 @@ def main():
         loop.start()
                 
     def process_Image(image):
-        imgage = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         if chkBtnSign1.get() == 1:
-            img_temp1 = signDetect(image, dP.haarStopSign, "Stop sign")
+            img_temp1 = signDetect(image, dP.haarStopSign, "Stop sign", 255,0,0)
         else:
             img_temp1 = image
         if chkBtnSign2.get() == 1:
-            img_temp2 = signDetect(img_temp1, dP.haarSpeedLimit, "Speed Limit Sign")
+            img_temp2 = signDetect(img_temp1, dP.haarSpeedLimit, "Speed Limit Sign", 0,255,0)
         else:
             img_temp2 = img_temp1
         if chkBtnSign3.get() == 1:
-            img_temp3 = signDetect(img_temp2, dP.haarTrafficLight, "Traffic Light")
+            img_temp3 = signDetect(img_temp2, dP.haarTrafficLight, "Traffic Light",0,0,255)
         else:
             img_temp3 = img_temp2
         img = img_temp3
@@ -168,21 +167,21 @@ def main():
 #************************************
 # Sign Detect
 #************************************
-def signDetect(img, typeSignalFile, label):
+def signDetect(img, typeSignalFile, label, c1, c2, c3):
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    #img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     haar_data = cv2.CascadeClassifier(typeSignalFile)
     
     found = haar_data.detectMultiScale(img_gray,minSize =(20, 20))
     if len(found) !=0:
         print(" ",label,"found!")
         for (x, y, width, height) in found:
-            cv2.rectangle(img_rgb, (x, y),
+            cv2.rectangle(img, (x, y),
 					(x + height, y + width),
-					(0, 255, 0), 5)
-        img = img_rgb
+					(c1, c2, c3), 5)
     else:
-        print(" NO",label,"sign")
+        #print(" NO",label,"sign")
+        pass
     return img
 
 #************************************
