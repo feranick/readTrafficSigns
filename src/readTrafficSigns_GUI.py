@@ -10,6 +10,7 @@ print(__doc__)
 
 import tkinter as tk
 import numpy as np
+import scipy
 import os, sys, platform, configparser, time, cv2, threading
 from tkinter import filedialog
 from tkinter import *
@@ -257,6 +258,8 @@ def getPredictions(R, model):
         
     else:
         predictions = model.predict(R)
+        
+    #probabilities = scipy.special.softmax(predictions.astype('double'))
     return predictions
 
 #************************************
