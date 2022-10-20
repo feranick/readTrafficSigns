@@ -103,14 +103,13 @@ def main():
     top.title('Traffic sign classification')
     top.configure(background='#CDCDCD')
 
-    label=Label(top,background='#CDCDCD', font=('arial',15,'bold'))
     filelabel=Label(top,background='#CDCDCD', font=('arial',15))
     sign_image = Label(top)
+    label=Label(top,background='#CDCDCD', font=('arial',15,'bold'))
+    chkBtnStopSign = tk.IntVar()
     
     model = loadModel()
-    #from keras.models import load_model
-    #model = load_model(name+"_classifier.h5")
-    
+
     def upload_image():
         file_path=filedialog.askopenfilename()
         img = cv2.imread(file_path)
@@ -125,7 +124,11 @@ def main():
     def get_webcam_stream():
         loop.start()
                 
-    def process_Image(img):
+    def process_Image(image):
+        if chkBtnStopSign.get() == 1:
+            img = stopSignDetect(image)
+        else:
+            img = image
         width = int((img.shape[1]-img.shape[0])/2)
         width2 = int((img.shape[1]+img.shape[0])/2)
         uploaded = Image.fromarray(img[:,width:width2,:])
@@ -162,32 +165,44 @@ def main():
             " (",probabilities[0][pred_class][0],")")
         
         label.configure(foreground='#011638', text=sign)
+        
+    def stop_stream():
+        if loop.is_running:
+            loop.stop()
+        #cam.releaseCam()
 
     upload=Button(top,text="Upload an image",command=upload_image,padx=10,pady=5)
     upload.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
-    upload.pack(side=BOTTOM,pady=50)
+    #upload.pack(side=BOTTOM,pady=50)
+    upload.place(relx=0.05,rely=0.25)
 
     startCamera=Button(top,text="Start camera",command=get_webcam_image,padx=10,pady=5)
     startCamera.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
-    startCamera.pack(side=BOTTOM,pady=50)
-    startCamera.place(relx=0.79,rely=0.46)
+    #startCamera.pack(side=BOTTOM,pady=50)
+    startCamera.place(relx=0.05,rely=0.20)
     
     startStream=Button(top,text="Start camera stream",command=get_webcam_stream,padx=10,pady=5)
     startStream.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
-    startStream.pack(side=BOTTOM,pady=50)
-    startStream.place(relx=0.79,rely=0.30)
+    #startStream.pack(side=BOTTOM,pady=50)
+    startStream.place(relx=0.79,rely=0.20)
+    
+    stopStream=Button(top,text="Stop camera stream",command=stop_stream,padx=10,pady=5)
+    stopStream.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
+    #stopStream.pack(side=BOTTOM,pady=50)
+    stopStream.place(relx=0.79,rely=0.25)
+    
+    stopSignChkBtn = tk.Checkbutton(top, text='Stop Sign Detection',variable=chkBtnStopSign, onvalue=1, offvalue=0, command=get_webcam_stream)
+    stopSignChkBtn.place(relx=0.79,rely=0.30)
     
     sign_image.pack(side=BOTTOM,expand=True)
     label.pack(side=BOTTOM,expand=True)
     filelabel.pack(side=BOTTOM,expand=True)
-    heading = Label(top, text="Know Your Traffic Sign",pady=20, font=('arial',20,'bold'))
+    heading = Label(top, text="Traffic Sign Identification",pady=5, font=('arial',20,'bold'))
     heading.configure(background='#CDCDCD',foreground='#364156')
     heading.pack()
     
     def on_closing():
-        if loop.is_running:
-            loop.stop()
-        cam.releaseCam()
+        stop_stream()
         top.destroy()
             
     top.protocol("WM_DELETE_WINDOW", on_closing)
@@ -253,6 +268,26 @@ def getPredictions(R, model):
         
     probabilities = scipy.special.softmax(predictions.astype('double'))
     return predictions, probabilities
+    
+#************************************
+# Sto Sign Detect
+#************************************
+def stopSignDetect(img):
+    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    stop_data = cv2.CascadeClassifier('stop_data.xml')
+
+    found = stop_data.detectMultiScale(img_gray,minSize =(20, 20))
+    if len(found) !=0:
+        print(" Stop sign found!")
+        for (x, y, width, height) in found:
+            cv2.rectangle(img_rgb, (x, y),
+					(x + height, y + width),
+					(0, 255, 0), 5)
+        img = img_rgb
+    else:
+        print(" NO Stop sign")
+    return img
 
 #************************************
 # Get image from webcam
