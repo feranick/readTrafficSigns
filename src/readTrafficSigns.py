@@ -44,6 +44,7 @@ class Conf():
     def rTSDef(self):
         self.conf['Parameters'] = {
             'name' : 'roadSign',
+            'trainModelFolder' : 'Train',
             'num_classes' : 43,
             'epochs' : 40,
             'batch_size' : 32,
@@ -60,6 +61,7 @@ class Conf():
             self.rTSDef = self.conf['Parameters']
             self.sysDef = self.conf['System']
             self.name = self.rTSDef['name']
+            self.trainModelFolder = self.rTSDef['trainModelFolder']
             self.num_classes = self.conf.getint('Parameters','num_classes')
             self.epochs = self.conf.getint('Parameters','epochs')
             self.batch_size = self.conf.getint('Parameters','batch_size')
@@ -84,7 +86,7 @@ class Conf():
 def main():
     dP = Conf()
     
-    X_train, X_test, y_train, y_test = readLearnData("Train")
+    X_train, X_test, y_train, y_test = readLearnData(dP.trainModelFolder)
     print(X_train.shape, X_test.shape, y_train.shape, y_test.shape)
 
     #Converting the labels into one hot encoding
