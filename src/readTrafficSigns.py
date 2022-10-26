@@ -147,9 +147,20 @@ def cnn_model(input_shape):
     dP = Conf()
     if dP.custom_optimizer:
         print(" \nUsing custom Adam optimizer, with learning_rate="+str(dP.l_rate)+" and decay rate="+str(dP.l_rdecay)+"\n")
-        optim = tf.keras.optimizers.legacy.Adam(learning_rate=dP.l_rate, beta_1=0.9,
+        # Legacy optimizer
+        '''
+        optim = keras.optimizers.legacy.Adam(learning_rate=dP.l_rate, beta_1=0.9,
                     beta_2=0.999, epsilon=1e-08,
                     decay=dP.l_rdecay,
+                    amsgrad=False)
+        '''
+        # New version
+        lr_schedule = keras.optimizers.schedules.ExponentialDecay(
+            initial_learning_rate=dP.l_rate,
+            decay_steps=dP.epochs,
+            decay_rate=dP.l_rdecay)
+        optim = keras.optimizers.Adam(learning_rate=lr_schedule, beta_1=0.9,
+                    beta_2=0.999, epsilon=1e-08,
                     amsgrad=False)
     else:
         optim = 'adam'
