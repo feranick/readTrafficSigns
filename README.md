@@ -14,6 +14,22 @@ Features
 5. Installable setup.py
 6. INI file for configuration parameters (no need to change the source once installed)
 
+Required libraries
+===================
+   - tensorflow (version `<= 2.10.x`)
+   - numpy
+   - scikit-learn (>=0.18)
+   - scipy
+   - matplotlib
+   - pandas
+   - h5py
+   - Optional: tensorflow-lite (v.2.3 and higher)
+   - Optional: [tensorflow-lite runtime](https://www.tensorflow.org/lite/guide/python) 
+   - Optional: tensorflow-lite runtime with [Coral EdgeTPU](https://coral.ai/docs/accelerator/get-started/)
+   
+   In addition, these packages may be needed depending on your platform (via ```apt-get``` in debian/ubuntu or ```port``` in OSX):
+    `python3-tk`
+
 Credits
 =============
 Based on the code available here:
