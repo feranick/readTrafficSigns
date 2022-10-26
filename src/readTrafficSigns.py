@@ -3,7 +3,7 @@
 '''
 *****************************************************************************
 * OpenCV keras traffic sign recognition - Training
-* 20221026a
+* 20221026b
 * https://data-flair.training/blogs/python-project-traffic-signs-recognition/
 *****************************************************************************
 '''
@@ -147,7 +147,7 @@ def cnn_model(input_shape):
     dP = Conf()
     if dP.custom_optimizer:
         print(" \nUsing custom Adam optimizer, with learning_rate="+str(dP.l_rate)+" and decay rate="+str(dP.l_rdecay)+"\n")
-        optim = tf.keras.optimizers.Adam(learning_rate=dP.l_rate, beta_1=0.9,
+        optim = tf.keras.optimizers.legacy.Adam(learning_rate=dP.l_rate, beta_1=0.9,
                     beta_2=0.999, epsilon=1e-08,
                     decay=dP.l_rdecay,
                     amsgrad=False)
