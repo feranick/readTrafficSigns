@@ -3,6 +3,7 @@
 '''
 *****************************************************************************
 * OpenCV keras traffic sign recognition - GUI prediction
+* 20221026a
 * https://data-flair.training/blogs/python-project-traffic-signs-recognition/
 *****************************************************************************
 '''

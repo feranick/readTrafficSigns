@@ -3,6 +3,7 @@
 '''
 *****************************************************************************
 * OpenCV HAAR sign detection
+* 20221026a
 * https://data-flair.training/blogs/python-project-traffic-signs-recognition/
 *****************************************************************************
 '''
