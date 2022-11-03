@@ -7,7 +7,7 @@ setup(
     entry_points={'console_scripts' : ['readTrafficSigns=readTrafficSigns:readTrafficSigns','readTrafficSigns_GUI=readTrafficSigns_GUI:readTrafficSigns_GUI'
         ,'detectTrafficSigns=detectTrafficSigns:detectTrafficSigns']},
     py_modules=['readTrafficSigns','readTrafficSigns_GUI', 'detectTrafficSigns'],
-    version='20221026b',
+    version='20221103a',
     description='Recognize Road Signs',
     long_description= """ Recognize Road Signs """,
     author='Nicola Ferralis',

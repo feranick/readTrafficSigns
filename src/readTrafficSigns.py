@@ -3,7 +3,7 @@
 '''
 *****************************************************************************
 * OpenCV keras traffic sign recognition - Training
-* 20221026b
+* 20221103a
 * https://data-flair.training/blogs/python-project-traffic-signs-recognition/
 *****************************************************************************
 '''
@@ -147,20 +147,26 @@ def cnn_model(input_shape):
     dP = Conf()
     if dP.custom_optimizer:
         print(" \nUsing custom Adam optimizer, with learning_rate="+str(dP.l_rate)+" and decay rate="+str(dP.l_rdecay)+"\n")
+        #************************************
+        ### Define optimizer
+        #************************************
+        #optim = opt.SGD(lr=0.0001, decay=1e-6, momentum=0.9, nesterov=True)
+        if checkTFVersion():
+            # New version
+            print("  Using new optimizer for TF > = 2.11\n")
+            lr_schedule = keras.optimizers.schedules.ExponentialDecay(
+                initial_learning_rate=dP.l_rate,
+                decay_steps=dP.epochs,
+                decay_rate=dP.l_rdecay)
+            optim = keras.optimizers.Adam(learning_rate=lr_schedule, beta_1=0.9,
+                    beta_2=0.999, epsilon=1e-08,
+                    amsgrad=False)
+        else:
         # Legacy optimizer
-        '''
-        optim = keras.optimizers.legacy.Adam(learning_rate=dP.l_rate, beta_1=0.9,
+            print("  Using legacy optimizer for TF < 2.11\n")
+            optim = keras.optimizers.legacy.Adam(learning_rate=dP.l_rate, beta_1=0.9,
                     beta_2=0.999, epsilon=1e-08,
                     decay=dP.l_rdecay,
-                    amsgrad=False)
-        '''
-        # New version
-        lr_schedule = keras.optimizers.schedules.ExponentialDecay(
-            initial_learning_rate=dP.l_rate,
-            decay_steps=dP.epochs,
-            decay_rate=dP.l_rdecay)
-        optim = keras.optimizers.Adam(learning_rate=lr_schedule, beta_1=0.9,
-                    beta_2=0.999, epsilon=1e-08,
                     amsgrad=False)
     else:
         optim = 'adam'
@@ -263,6 +269,18 @@ def makeQuantizedTFmodel(A, model, name):
 
     with open(name+'.tflite', 'wb') as o:
         o.write(tflite_quant_model)
+        
+#************************************
+# Get TensorFlow Version
+#************************************
+# This will be deprecated with support for TF >= 2.11 is stable across platforms
+def checkTFVersion():
+    import tensorflow as tf
+    from pkg_resources import parse_version
+    if  parse_version(tf.version.VERSION) <  parse_version("2.11.0rc0"):
+        return False
+    else:
+        return True
     
 #************************************
 # Main initialization routine
