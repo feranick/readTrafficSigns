@@ -16,7 +16,7 @@ Features
 
 Required libraries
 ===================
-   - tensorflow (=<2.11.x)
+   - tensorflow (>= 2.12.x)
    - numpy
    - scikit-learn (>=0.18)
    - scipy
