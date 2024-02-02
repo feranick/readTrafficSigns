@@ -27,8 +27,9 @@ Required libraries
    - Optional: [tensorflow-lite runtime](https://www.tensorflow.org/lite/guide/python) 
    - Optional: tensorflow-lite runtime with [Coral EdgeTPU](https://coral.ai/docs/accelerator/get-started/)
    
-   In addition, these packages may be needed depending on your platform (via ```apt-get``` in debian/ubuntu or ```port``` in OSX):
-    `python3-tk`
+   In addition, these packages may be needed depending on your platform: (via ```apt-get``` in debian/ubuntu or ```port``` in OSX):
+   - [Debian/Ubuntu] `sudo apt install python3-tk`
+   - [MacOS] `sudo port install py311-tkinter`
 
 Credits
 =============

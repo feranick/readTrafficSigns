@@ -91,7 +91,7 @@ def main():
     try:
         top=tk.Tk()
     except:
-        print( "You need a runing instance of X Windows, Abort\n")
+        print( "You need a running instance of X Windows, Abort\n")
         return
     
     try:
